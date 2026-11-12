@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Reporte SIRCI</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: url('96d473e6-29ff-4d09-8372-e298038d21ec.png') no-repeat center center fixed;
+  background-size: cover;
+  color: white;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: -1;
+}
+
+textarea, input, select {
+  width: 100%;
+  padding: 6px;
+  margin-top: 4px;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: rgba(255,255,255,0.9);
+  color: #000;
+}
+
+button {
+  padding: 10px 15px;
+  margin: 10px 5px 20px 0;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+  border: none;
+}
+
+#btnGenerar { background-color: #4CAF50; color: white; }
+#btnCopiar { background-color: #2196F3; color: white; }
+#btnLimpiar { background-color: #f44336; color: white; }
+#btnMovilPatio { background-color: #FF9800; color: white; }
+
+.reporte {
+  background: rgba(255,255,255,0.9);
+  padding: 20px;
+  max-width: 750px;
+  border-radius: 6px;
+  color: #000;
+}
+
+.campo { margin-bottom: 10px; }
+label { font-weight: bold; }
+
+#mensaje {
+  display: none;
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+#mensaje.success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+#mensaje.error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+  /* LOGIN */
+  #loginContainer {
+    max-width: 350px;
+    margin: 120px auto;
+    padding: 30px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 8px;
+    text-align: center;
+    color: #000;
+  }
+
+  #loginContainer h2 {
+    margin-bottom: 20px;
+  }
+
+  #loginContainer button {
+    width: 100%;
+    background: #4CAF50;
+    color: white;
+  }
+
+  #loginError {
+    color: red;
+    margin-top: 10px;
+  }
+
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginContainer">
+  <h2>Acceso al sistema</h2>
+
+  <input type="text" id="loginUser" placeholder="Usuario">
+  <input type="password" id="loginPass" placeholder="Contraseña">
+
+  <button onclick="validarLogin()">Ingresar</button>
+
+  <p id="loginError"></p>
+</div>
+
+
+<!-- APLICACIÓN -->
+<div id="appContainer" style="display:none;">
+<h1>Generador de Reporte desde Nota SIRCI</h1>
+
+<div id="mensaje"></div>
+
+<h3>Nota</h3>
+<textarea id="nota" rows="6" placeholder="Pega aquí la nota completa..."></textarea>
+
+<button id="btnGenerar">Generar reporte</button>
+<button id="btnMovilPatio">Móvil en patio</button>
+<button id="btnCopiar">Copiar reporte</button>
+<button id="btnLimpiar">Limpiar todo</button>
+
+<div class="reporte">
+<h2>Detalle del reporte</h2>
+
+<div class="campo">
+<label>Nombre de contacto:</label>
+<select id="nombreContacto">
+  <option value="">Seleccione un técnico</option>
+  <option>PABLO ENRIQUE SAMPER GALVIS</option>
+  <option>NEYDER FABIAN MORENO MENDOZA</option>
+  <option>RICHARD DE JESUS ARRIETA OCHOA</option>
+  <option>CRISTIAN QUIÑONEZ REINOSO</option>
+  <option>IVAN MAURICIO GOMEZ MEDINA</option>
+  <option>YONATAN YAIRTH BONILLA PEÑA</option>
+  <option>ARIANNA DAZA</option>
+  <option>JHON SAENZ</option>
+  <option>CARLOS ARLEY CRUZ VARGAS</option>
+  <option>SANTIAGO LEON</option>
+  <option>MIGUEL ALEJANDRO  PEÑALOZA RODRIGUEZ</option>
+  <option>DIEGO ALEXANDER BELTRAN</option>
+  <option>RICARDO BARON</option>
+  <option>JOHN JAIRO RINCON VILLAMIL</option>
+</select>
+</div>
+
+<div class="campo"><label>Teléfono:</label>
+<input value="3242911284 // 3242911287" readonly>
+</div>
+
+<div class="campo"><label>Tabla:</label><input id="tabla"></div>
+<div class="campo"><label>Ruta:</label><input id="ruta"></div>
+<div class="campo"><label>Viaje:</label><input id="viaje"></div>
+<div class="campo"><label>Servicio:</label><input value="ZONAL" readonly></div>
+<div class="campo"><label>Descripción del reporte:</label><textarea id="descripcion" rows="3"></textarea></div>
+<div class="campo"><label>Fecha y hora de novedad:</label><input id="fechaHora"></div>
+<div class="campo"><label>Código operador:</label><input id="operador"></div>
+<div class="campo"><label>Ubicación aproximada:</label><input id="ubicacion"></div>
+
+</div>
+
+
+<script>
+
+/* LOGIN */
+function validarLogin() {
+  const user = document.getElementById("loginUser").value;
+  const pass = document.getElementById("loginPass").value;
+
+  if (user === "Admin" && pass === "Green2026") {
+    document.getElementById("loginContainer").style.display = "none";
+    document.getElementById("appContainer").style.display = "block";
+  } else {
+    document.getElementById("loginError").textContent =
+      "Usuario o contraseña incorrectos";
+  }
+}
+
+/* ENTER PARA LOGIN */
+document.addEventListener("keydown", function (e) {
+  if (
+    e.key === "Enter" &&
+    document.getElementById("loginContainer").style.display !== "none"
+  ) {
+    validarLogin();
+  }
+});
+
+function extraerDato(nota, etiqueta) {
+  const regex = new RegExp(etiqueta + "\\s*:?\\s*([^/\\n]+)", "i");
+  const match = nota.match(regex);
+  return match ? match[1].trim() : "";
+}
+
+function extraerNovedadSirci(nota) {
+  const regex = /(?:\*?\s*(?:novedades\s+sirci|sirci)\s*\*?)\s*([^/]+)/i;
+  const match = nota.match(regex);
+  return match ? match[1].trim() : "No se encontró novedad SIRCI";
+}
+
+function mostrarMensaje(texto, tipo="success") {
+  const m = document.getElementById("mensaje");
+  m.textContent = texto;
+  m.className = tipo;
+  m.style.display = "block";
+  setTimeout(() => m.style.display = "none", 3000);
+}
+
+function copiarTextoSeguro(texto) {
+  const textarea = document.createElement("textarea");
+  textarea.value = texto;
+  document.body.appendChild(textarea);
+  textarea.select();
+  textarea.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(textarea);
+}
+
+document.getElementById("btnGenerar").onclick = () => {
+  const nota = document.getElementById("nota").value;
+  if (!nota.trim()) {
+    mostrarMensaje("Pega la nota primero", "error");
+    return;
+  }
+
+  document.getElementById("tabla").value = extraerDato(nota, "Tabla");
+  document.getElementById("ruta").value = extraerDato(nota, "Ruta");
+  document.getElementById("viaje").value = extraerDato(nota, "Viaje");
+  document.getElementById("operador").value = extraerDato(nota, "Operador");
+
+  const fecha = extraerDato(nota, "Fecha");
+  const hora = extraerDato(nota, "Hora");
+  document.getElementById("fechaHora").value = `${fecha} ${hora}`.trim();
+
+  document.getElementById("ubicacion").value =
+    `${extraerDato(nota, "Dirección")} - ${extraerDato(nota, "Sentido")}`;
+
+  document.getElementById("descripcion").value = extraerNovedadSirci(nota);
+
+  mostrarMensaje("Reporte generado correctamente");
+};
+
+document.getElementById("btnMovilPatio").onclick = () => {
+  const ahora = new Date();
+  const fechaHora =
+    ahora.toLocaleDateString("es-CO") + " " +
+    ahora.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
+
+  document.getElementById("tabla").value = "móvil en patio";
+  document.getElementById("ruta").value = "móvil en patio";
+  document.getElementById("viaje").value = "móvil en patio";
+  document.getElementById("operador").value = "móvil en patio";
+  document.getElementById("ubicacion").value = "móvil en patio";
+  document.getElementById("fechaHora").value = fechaHora;
+  document.getElementById("descripcion").value = "";
+
+  mostrarMensaje("Reporte configurado: Móvil en patio");
+};
+
+document.getElementById("btnCopiar").onclick = () => {
+  const tecnico = document.getElementById("nombreContacto").value;
+  if (!tecnico) {
+    mostrarMensaje("Seleccione un técnico", "error");
+    return;
+  }
+
+  const texto = `
+Detalle del reporte
+
+Nombre de contacto: ${tecnico}
+Teléfono de contacto: 3242911284 // 3242911287
+Tabla: ${document.getElementById("tabla").value}
+Ruta: ${document.getElementById("ruta").value}
+Viaje: ${document.getElementById("viaje").value}
+Servicio: ZONAL
+Descripción del reporte: ${document.getElementById("descripcion").value}
+Fecha y hora de novedad: ${document.getElementById("fechaHora").value}
+Código operador: ${document.getElementById("operador").value}
+La Novedad es intermitente o durante toda la ruta?: intermitente
+Ubicación aproximada: ${document.getElementById("ubicacion").value}
+`;
+
+  copiarTextoSeguro(texto);
+  mostrarMensaje("Reporte copiado al portapapeles");
+};
+
+document.getElementById("btnLimpiar").onclick = () => {
+  document.getElementById("nota").value = "";
+  document.getElementById("tabla").value = "";
+  document.getElementById("ruta").value = "";
+  document.getElementById("viaje").value = "";
+  document.getElementById("descripcion").value = "";
+  document.getElementById("fechaHora").value = "";
+  document.getElementById("operador").value = "";
+  document.getElementById("ubicacion").value = "";
+  document.getElementById("nombreContacto").value = "";
+  mostrarMensaje("Formulario limpio");
+};
+</script>
+
+</body>
+</html>
+
+
